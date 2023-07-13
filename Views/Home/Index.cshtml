@@ -1,0 +1,41 @@
+﻿@model CheckersProject.Models.Board
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="container">
+    <div class="chessboard">
+        @foreach (var cell in Model.cells)
+        {
+            if (cell.colour == "black")
+            {
+                if (cell.piece != null)
+                {
+                    System.Diagnostics.Debug.WriteLine(cell.possibleMoves.Select(x => x.index).ToList());
+                    <div class="black" onclick="showPossibleMoveDiv(@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(cell.possibleMoves.Select(x => x.index).ToList())))">
+                        <div class="checker white-checker" hidden="hidden" id="cell-@cell.index" style="width:50px;height:50px;background-color:aqua">aaaaaaa</div>
+                        @if (cell.piece.team == "white")
+                        {
+                            <div class="checker white-checker" draggable="true"></div>
+                        }
+                        @if (cell.piece.team == "black")
+                        {
+                            <div class="checker black-checker" draggable="true"></div>
+                        }
+                    </div>
+                }
+                else{
+                    <div class="black">
+                         <div class="checker possible-move" hidden="hidden" id="cell-@cell.index"></div>
+                    </div>
+                }
+
+            }
+            else
+            {
+                <div class="white">
+                </div>
+            }
+        }
+    </div>
+</div>
