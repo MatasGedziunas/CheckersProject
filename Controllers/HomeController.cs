@@ -7,6 +7,7 @@ namespace CheckersProject.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private Board board = new Board();
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -15,12 +16,20 @@ namespace CheckersProject.Controllers
 
         public IActionResult Index()
         {
-            return View(new Board());
+            return View(board);
         }
 
-        public IActionResult Privacy()
+        public void MakeMove(int indexFrom, int indexTo)
         {
-            return View();
+            board.MovePiece(indexFrom, indexTo);
+            board.PrintBoard();
+        }
+
+        public List<int> GetPossibleMoves(int index)
+        {
+            System.Diagnostics.Debug.WriteLine($"indexas: {index}");
+            board.PossibleMovesFromCell(index).ForEach(x => System.Diagnostics.Debug.WriteLine(x));
+            return board.PossibleMovesFromCell(index);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
