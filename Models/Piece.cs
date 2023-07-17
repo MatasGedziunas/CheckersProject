@@ -1,10 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CheckersProject.Models
 {
     public class Piece
     {
+        
         [Key]
+
         public int Id { get; set; }
         public teamColour team { get; set; } // "white" or "black"
         

@@ -4,6 +4,7 @@ using CheckersProject;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CheckersProject.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+    [Migration("20230717142122_Nullable players in game")]
+    partial class Nullableplayersingame
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,7 +41,7 @@ namespace CheckersProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Games", (string)null);
+                    b.ToTable("Games");
                 });
 
             modelBuilder.Entity("CheckersProject.Data.User", b =>
@@ -65,7 +68,7 @@ namespace CheckersProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("CheckersProject.Models.Board", b =>
@@ -78,7 +81,7 @@ namespace CheckersProject.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("Boards", (string)null);
+                    b.ToTable("Boards");
                 });
 
             modelBuilder.Entity("CheckersProject.Models.Cell", b =>
@@ -107,7 +110,7 @@ namespace CheckersProject.Migrations
 
                     b.HasIndex("pieceId");
 
-                    b.ToTable("Cells", (string)null);
+                    b.ToTable("Cells");
                 });
 
             modelBuilder.Entity("CheckersProject.Models.Piece", b =>
@@ -126,7 +129,7 @@ namespace CheckersProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Pieces", (string)null);
+                    b.ToTable("Pieces");
                 });
 
             modelBuilder.Entity("CheckersProject.Models.Cell", b =>

@@ -7,6 +7,7 @@ namespace CheckersProject.Models
     public class Cell
     {
         [Key]
+
         public int id { get; set; }
         public int x { get; private set; }
         public int y { get; private set; }

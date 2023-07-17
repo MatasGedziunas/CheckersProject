@@ -13,6 +13,7 @@ namespace CheckersProject.Models
         [NotMapped]
         public const int YAXISLENGHT = 10;
         [Key]
+
         public int id { get; set; }
         public List<Cell> cells { get; } = new List<Cell>();
         public Board()

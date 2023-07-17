@@ -26,6 +26,30 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
+                    <ul class="navbar-nav flex-grow-1 justify-content-end">
+                        @if(User.Identity.IsAuthenticated)
+                        {
+                            System.Diagnostics.Debug.WriteLine(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value);
+                            System.Diagnostics.Debug.WriteLine(User.Claims.First(c => c.Type == "id")?.Value);
+                            System.Diagnostics.Debug.WriteLine("aaaaaa");
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="/Users/Details/@(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value)">My User</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area=""  asp-controller="Users" asp-action="Logout">Logout</a>
+                            </li>
+                            
+                        }
+                        else{
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Register">Register</a>
+                            </li>
+                        }
+                        
+                    </ul>
                 </div>
             </div>
         </nav>

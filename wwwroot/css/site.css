@@ -76,3 +76,7 @@ body {
     display: table-cell;
     vertical-align: middle;
 }
+
+input.form-control {
+    width: 450px;
+}
