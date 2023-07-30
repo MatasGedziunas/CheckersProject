@@ -7,13 +7,15 @@ namespace CheckersProject.Models
     public class Cell
     {
         [Key]
-
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
         public int x { get; private set; }
         public int y { get; private set; }
         public teamColour colour { get; }
         public int index { get; }
-        
+
+        public int boardId { get; set; }
+        public Board board { get; set; }
         public int? pieceId { get; set; }
 
         [ForeignKey("pieceId")]

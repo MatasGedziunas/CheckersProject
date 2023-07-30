@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using CheckersProject;
 using CheckersProject.Data;
 using CheckersProject.Models;
+using Microsoft.Identity.Client;
+using Microsoft.AspNetCore.Authorization;
+using System.IO.Pipelines;
 
 namespace CheckersProject.Controllers
 {
@@ -20,23 +23,7 @@ namespace CheckersProject.Controllers
             _context = context;
         }
 
-        /*public IActionResult Index()
-        {
-            return View(board);
-        }
-
-        public void MakeMove(int indexFrom, int indexTo)
-        {
-            board.MovePiece(indexFrom, indexTo);
-            board.PrintBoard();
-        }
-
-        public List<int> GetPossibleMoves(int index)
-        {
-            System.Diagnostics.Debug.WriteLine($"indexas: {index}");
-            board.PossibleMovesFromCell(index).ForEach(x => System.Diagnostics.Debug.WriteLine(x));
-            return board.PossibleMovesFromCell(index);
-        }*/
+        
 
 
         // GET: Games
@@ -47,137 +34,112 @@ namespace CheckersProject.Controllers
                           Problem("Entity set 'DBContext.Games'  is null.");
         }
 
-        // GET: Games/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [Authorize]
+        public IActionResult Details(int gameId)
         {
-            if (id == null || _context.Games == null)
-            {
-                return NotFound();
-            }
-
-            var game = await _context.Games
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (game == null)
-            {
-                return NotFound();
-            }
-
-            return View(game);
+            return View("Match", GetGameBoard(gameId));
         }
 
-        // GET: Games/Create
-        public IActionResult Create()
+        [Authorize]                
+        public async Task<IActionResult> Create(int userId)
         {
-            return View();
+            int gameId = await CreateGame(userId);
+            return View("Match", GetGameBoard(gameId));
         }
-
-        // POST: Games/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,WhiteUserId,BlackUserId")] Game game)
+        private async Task<int> CreateGame(int userId)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(game);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(game);
-        }
-
-        // GET: Games/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Games == null)
-            {
-                return NotFound();
-            }
-
-            var game = await _context.Games.FindAsync(id);
-            if (game == null)
-            {
-                return NotFound();
-            }
-            return View(game);
-        }
-
-        // POST: Games/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,WhiteUserId,BlackUserId")] Game game)
-        {
-            if (id != game.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(game);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!GameExists(game.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(game);
-        }
-
-        // GET: Games/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Games == null)
-            {
-                return NotFound();
-            }
-
-            var game = await _context.Games
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (game == null)
-            {
-                return NotFound();
-            }
-
-            return View(game);
-        }
-
-        // POST: Games/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Games == null)
-            {
-                return Problem("Entity set 'DBContext.Games'  is null.");
-            }
-            var game = await _context.Games.FindAsync(id);
-            if (game != null)
-            {
-                _context.Games.Remove(game);
-            }
-            
+            Game game = new Game();
+            game.SetUserColour(userId);
+            _context.Games.Add(game);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return game.Id;
         }
 
-        private bool GameExists(int id)
+        private Board GetLastBoard(int gameId)
         {
-          return (_context.Games?.Any(e => e.Id == id)).GetValueOrDefault();
+            return new Board();
         }
+       
+        private Game GetGame(int gameId)
+        {
+            return _context.Games.First(g => g.Id == gameId);
+        }
+
+        private Board GetGameBoard(int gameId)
+        {
+            List<Move> gameMoves = GetGameMoves(gameId);
+            Board board = new Board();
+            board.GameId = gameId;
+            foreach(Move move in gameMoves)
+            {
+                PlayMove(board, move);
+            }
+            board.PrintBoard();
+            return board;
+        }
+
+        private void PlayMove(Board board, Move move)
+        {
+            Piece temp = board.Cells[move.FromCell].piece;
+            board.Cells[move.FromCell].piece = board.Cells[move.ToCell].piece;
+            board.Cells[move.ToCell].piece = temp;
+        }
+
+        private List<Move> GetGameMoves(int gameId)
+        {
+            return _context.Moves.Where(move => move.GameId == gameId).ToList();
+        }
+        
+        [Authorize]
+        public void MakeMove(int indexFrom, int indexTo, int gameId, int userId)
+        {          
+            
+            // Save the changes to the database
+            AddMoveToDatabase(indexFrom, indexTo, userId, gameId);
+            _context.SaveChanges();
+        }
+
+        public void MovePiece(int indexFrom, int indexTo, Board board)
+        {
+            List<Cell> gameCells = board.Cells;
+            Piece? temp = gameCells[indexFrom].piece;
+            gameCells[indexFrom].piece = null;
+            gameCells[indexTo].piece = temp;
+            // Save the changes to the database
+            _context.SaveChanges();
+        }
+
+
+
+
+        [Authorize]
+        public void AddMoveToDatabase(int indexFrom, int indexTo, int userId, int gameId)
+        {
+            Move move = new Move()
+            {
+                GameId = gameId,
+                UserId = userId,
+                MoveNumber = GetLastMoveNumberForGame(gameId),
+                FromCell = indexFrom,
+                ToCell = indexTo,
+            };
+            _context.Moves.Add(move);
+        }
+        private int GetLastMoveNumberForGame(int gameId)
+        {
+            return _context.Moves
+                .OrderBy(move => move.MoveNumber)
+                .LastOrDefault(move => move.GameId == gameId)?.MoveNumber + 1 ?? 1;
+        }
+
+        public List<int> GetPossibleMoves(int index, int gameId)
+        {
+            System.Diagnostics.Debug.WriteLine($"indexas: {index}");
+            Board board = GetLastBoard(gameId);
+            board.PossibleMovesFromCell(index).ForEach(x => System.Diagnostics.Debug.WriteLine(x));
+            return board.PossibleMovesFromCell(index);
+        }
+
+       
     }
 }

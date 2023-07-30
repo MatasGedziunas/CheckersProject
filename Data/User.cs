@@ -7,7 +7,7 @@ namespace CheckersProject.Data
     public class User
     {
         [Key]
-        
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [MinLength(5), MaxLength(15)]
         

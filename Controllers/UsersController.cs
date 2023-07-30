@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using CheckersProject;
 using CheckersProject.Data;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
-using NuGet.Protocol.Core.Types;
 using Microsoft.AspNetCore.Authorization;
 using System.Diagnostics;
 
@@ -52,7 +49,7 @@ namespace CheckersProject.Controllers
                 ModelState.AddModelError("Username", "User with this username already exists");
                 return View(user);                
             }
-            if (UserEmailExists(user.Username))
+            if (UserEmailExists(user.Email))
             {
                 ModelState.AddModelError("Email", "User with this email already exists");
                 return View(user);
@@ -86,14 +83,22 @@ namespace CheckersProject.Controllers
             }
             else
             {
-                ModelState.AddModelError("Password", "problem");
+                ModelState.AddModelError("Password", "Invalid Credentials");
                 return View();
             }
         }
 
         private async Task<User> FindUserByUsernamePassword(string username, string password)
         {
-            return await _context.Users.FirstAsync(user => user.Username == username && user.Password == password);
+            try
+            {
+                return await _context.Users.FirstAsync(user => user.Username == username && user.Password == password);
+            }
+            catch
+            {
+                return null;
+            }
+            
         }
 
 
@@ -229,7 +234,7 @@ namespace CheckersProject.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
-            return Redirect("/Home/Index");
+            return Redirect("/");
         }
         private bool UserUsernameExists(string username)
         {

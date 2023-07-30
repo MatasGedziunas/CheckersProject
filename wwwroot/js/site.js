@@ -5,9 +5,13 @@
 
 let lastClickedDiv = null;
 
-function showPossibleMoveDiv(clickedDiv) {
+function GenerateCorrectChessBoard() {
+
+}
+
+function ShowPossibleMoveDiv(clickedDiv, gameId) {
     hideAllPossibleMoveDiv();
-    let indexes = getAllPossibleMoveIndexes(clickedDiv.id.split("-")[1]);
+    let indexes = getAllPossibleMoveIndexes(clickedDiv.id.split("-")[1], gameId);
     if (lastClickedDiv === clickedDiv) {
         lastClickedDiv = null;
     } else {
@@ -19,7 +23,7 @@ function showPossibleMoveDiv(clickedDiv) {
     }
 }
 
-function hideAllPossibleMoveDiv() {
+function HideAllPossibleMoveDiv() {
     let possibleMoveDivs = document.querySelectorAll('.possible-move');
     for (const element of possibleMoveDivs) {
 
@@ -28,28 +32,29 @@ function hideAllPossibleMoveDiv() {
     }
 }
 
-function getAllPossibleMoveIndexes(indexFrom) {
+function GetAllPossibleMoveIndexes(indexFrom, gameId) {
     let possibleMoveIndexes = [];
     $.ajax({
-        url: '/Home/GetPossibleMoves',
+        url: '/Games/GetPossibleMoves',
         type: 'GET',
-        data: { index: indexFrom },
+        data: { index: indexFrom, gameId: gameId },
         async: false,
         success: function (response) {
             possibleMoveIndexes = response;
         }
     });
+    console.log(possibleMoveIndexes);
     return possibleMoveIndexes;
 }
 
 
-function makeMove(clickedPossibleMoveDiv) {
+function MakeMove(clickedPossibleMoveDiv, gameId, userId) {
     let indexFrom = lastClickedDiv.id.split('-')[1]; 
     let indexTo = clickedPossibleMoveDiv.id.split('-')[1];
         $.ajax({
-            url: '/Home/MakeMove',
+            url: '/Games/MakeMove',
             type: 'POST',
-            data: { indexFrom: indexFrom, indexTo: indexTo },
+            data: { indexFrom: indexFrom, indexTo: indexTo, gameId: gameId, userId: userId},
             success: function (response) {
                 // handle the response from the server
             }
@@ -58,8 +63,10 @@ function makeMove(clickedPossibleMoveDiv) {
 }
 
 
+
+
 // get possible move wrapper div and swap the inner htmls;
-function swapImages(divFrom, divTo) {
+function SwapImages(divFrom, divTo) {
     let temp = divFrom.className;
     divFrom.className = divTo.className;
     divTo.className = temp;
@@ -67,7 +74,7 @@ function swapImages(divFrom, divTo) {
     console.log(divFrom);
 }
 
-function getDivFirstInnerChild(div) {
+function GetDivFirstInnerChild(div) {
     return div.children[0];
 }
 

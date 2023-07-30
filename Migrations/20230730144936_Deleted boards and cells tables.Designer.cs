@@ -4,6 +4,7 @@ using CheckersProject;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CheckersProject.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+    [Migration("20230730144936_Deleted boards and cells tables")]
+    partial class Deletedboardsandcellstables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,10 +36,16 @@ namespace CheckersProject.Migrations
                     b.Property<int?>("BlackUserId")
                         .HasColumnType("int");
 
+                    b.Property<int>("LastBoardId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("WhiteUserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LastBoardId")
+                        .IsUnique();
 
                     b.ToTable("Games");
                 });
@@ -101,6 +110,48 @@ namespace CheckersProject.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("CheckersProject.Models.Board", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.HasKey("id");
+
+                    b.ToTable("Board");
+                });
+
+            modelBuilder.Entity("CheckersProject.Models.Cell", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<int>("boardId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("pieceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("x")
+                        .HasColumnType("int");
+
+                    b.Property<int>("y")
+                        .HasColumnType("int");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("boardId");
+
+                    b.HasIndex("pieceId");
+
+                    b.ToTable("Cell");
+                });
+
             modelBuilder.Entity("CheckersProject.Models.Piece", b =>
                 {
                     b.Property<int>("Id")
@@ -120,6 +171,17 @@ namespace CheckersProject.Migrations
                     b.ToTable("Pieces");
                 });
 
+            modelBuilder.Entity("CheckersProject.Data.Game", b =>
+                {
+                    b.HasOne("CheckersProject.Models.Board", "LastBoard")
+                        .WithOne()
+                        .HasForeignKey("CheckersProject.Data.Game", "LastBoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LastBoard");
+                });
+
             modelBuilder.Entity("CheckersProject.Data.Move", b =>
                 {
                     b.HasOne("CheckersProject.Data.Game", null)
@@ -129,9 +191,31 @@ namespace CheckersProject.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CheckersProject.Models.Cell", b =>
+                {
+                    b.HasOne("CheckersProject.Models.Board", "board")
+                        .WithMany("cells")
+                        .HasForeignKey("boardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CheckersProject.Models.Piece", "piece")
+                        .WithMany()
+                        .HasForeignKey("pieceId");
+
+                    b.Navigation("board");
+
+                    b.Navigation("piece");
+                });
+
             modelBuilder.Entity("CheckersProject.Data.Game", b =>
                 {
                     b.Navigation("Moves");
+                });
+
+            modelBuilder.Entity("CheckersProject.Models.Board", b =>
+                {
+                    b.Navigation("cells");
                 });
 #pragma warning restore 612, 618
         }

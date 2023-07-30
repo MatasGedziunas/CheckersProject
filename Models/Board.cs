@@ -13,9 +13,9 @@ namespace CheckersProject.Models
         [NotMapped]
         public const int YAXISLENGHT = 10;
         [Key]
-
-        public int id { get; set; }
-        public List<Cell> cells { get; } = new List<Cell>();
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int GameId { get; set; }
+        public List<Cell> Cells { get; } = new List<Cell>();
         public Board()
         {
             for (int y = 0; y < XAXISLENGHT; y++)
@@ -25,13 +25,18 @@ namespace CheckersProject.Models
                     Cell cell = new Cell(x, y);
                     if (y <= 3 && cell.colour == teamColour.black)
                     {
-                        cell.piece = new Piece(teamColour.black, pieceType.checker);
+                        Piece piece = new Piece(teamColour.black, pieceType.checker);
+                        cell.piece = piece;
+                        cell.pieceId = piece.Id;
+                        
                     }
                     else if (y >= 6 && cell.colour == teamColour.black)
                     {
-                        cell.piece = new Piece(teamColour.white, pieceType.checker);
+                        Piece piece = new Piece(teamColour.white, pieceType.checker);
+                        cell.piece = piece;
+                        cell.pieceId = piece.Id;
                     }
-                    cells.Add(cell);
+                    Cells.Add(cell);
                 }
             }
             SetPossibleMovesForAllCells();
@@ -39,15 +44,15 @@ namespace CheckersProject.Models
 
         public void PrintBoard()
         {
-            Cell prev = cells[0];
-            for(int i = 1; i < cells.Count; i++)
+            Cell prev = Cells[0];
+            for(int i = 1; i < Cells.Count; i++)
             {
-                if(prev.y != cells[i].y)
+                if(prev.y != Cells[i].y)
                 {
                     Debug.WriteLine("");
                 }
-                Debug.Write($" {(cells[i].piece != null ? 1 : 0)}");
-                prev = cells[i];
+                Debug.Write($" {(Cells[i].piece != null ? 1 : 0)}");
+                prev = Cells[i];
             }
         }
 
@@ -57,7 +62,7 @@ namespace CheckersProject.Models
 
         public void SetPossibleMovesForAllCells()
         {
-            foreach(var cell in cells)
+            foreach(var cell in Cells)
             {
                 if(cell.piece != null)
                 {
@@ -70,7 +75,7 @@ namespace CheckersProject.Models
         public void SetPossibleMovesFromCell(int index)
         {
 
-            cells[index].possibleMoves = PossibleMovesFromCell(index);
+            Cells[index].possibleMoves = PossibleMovesFromCell(index);
         }
 
 
@@ -81,7 +86,7 @@ namespace CheckersProject.Models
         /// <returns>A list of cells where to piece can move to</returns>
         public List<int> PossibleMovesFromCell(int index)
         {
-            Cell cell = cells[index];
+            Cell cell = Cells[index];
             if(cell.piece == null)
             {
                 throw new InvalidDataException();
@@ -120,7 +125,7 @@ namespace CheckersProject.Models
 
         private Cell GetCellFromCoordinates(int x, int y)
         {
-            return cells[y * 10 + x];
+            return Cells[y * 10 + x];
         }
 
         private bool CoordinatesInBounds(int x, int y)
@@ -130,12 +135,7 @@ namespace CheckersProject.Models
 
         //------------------MOVEMENT-----
 
-        public void MovePiece(int indexFrom, int indexTo)
-        {
-            Piece temp = cells[indexFrom].piece;
-            cells[indexFrom].piece = null;
-            cells[indexTo].piece = temp;
-        }
+        
 
     }
 }

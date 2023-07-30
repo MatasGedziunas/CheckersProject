@@ -5,15 +5,13 @@
 }
 <div class="container">
     <div class="chessboard">
-        @foreach (var cell in Model.cells)
+        @foreach (var cell in Model.Cells)
         {
             if (cell.colour == teamColour.black)
             {
                 if (cell.piece != null)
                 {
-                    System.Diagnostics.Debug.WriteLine(cell.possibleMoves);
-                    <div class="black" id="cell-@cell.index" onclick="showPossibleMoveDiv(this)">
-                        @*<div class="checker possible-move" hidden="hidden" id="cell-@cell.index" onclick="makeMove(this)"></div>*@
+                    <div class="black" id="cell-@cell.index" onclick="showPossibleMoveDiv(this, @Model.Id)">
                         @if (cell.piece.team == teamColour.white)
                         {
                             <div class="checker white-checker" draggable="true"></div>
@@ -26,7 +24,7 @@
                 }
                 else{
                     <div class="black">
-                        <div class="checker possible-move" hidden="hidden" id="cell-@cell.index" onclick="makeMove(this)"></div>
+                        <div class="checker possible-move" hidden="hidden" id="cell-@cell.index" onclick="makeMove(this, @Model.Id, @(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value))"></div>
                     </div>
                 }
 

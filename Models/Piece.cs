@@ -7,7 +7,7 @@ namespace CheckersProject.Models
     {
         
         [Key]
-
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public teamColour team { get; set; } // "white" or "black"
         
